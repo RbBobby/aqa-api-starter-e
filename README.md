@@ -42,7 +42,7 @@ pytest -m ui -v
 
 После тестов job **Allure report** собирает HTML, job **GitHub Pages** пушит его в ветку `gh-pages`.
 
-**https://rbbobby.github.io/aqa-api-starter/**
+**https://rbbobby.github.io/aqa-api-starter-e/**
 
 Пайплайн сам сайт не включает — у `GITHUB_TOKEN` нет такого права. Один раз в репозитории:
 
@@ -67,19 +67,26 @@ export API_TIMEOUT=30
 ```text
 aqa-api-starter/
 ├── api/
-│   └── client.py          # HTTP-клиент: Session, get/post
+│   └── client.py              # HTTP-клиент: Session, get/post
 ├── tests/
-│   ├── conftest.py        # фикстура api_client
-│   └── test_products.py   # сами тесты
-├── pytest.ini             # где искать тесты, allure-results
-└── requirements.txt       # pytest + requests + allure-pytest
+│   ├── conftest.py            # фикстура api_client
+│   ├── test_products.py       # GET и POST /productsList
+│   ├── test_brands.py         # GET /brandsList
+│   └── ui/
+│       └── test_ui_layer.py   # заглушка UI-слоя
+├── .github/workflows/tests.yml
+├── pytest.ini                 # где искать тесты, allure-results
+└── requirements.txt           # pytest + requests + allure-pytest
 ```
+
+Лекция по этой схеме: [docs/service-fixtures-report.md](docs/service-fixtures-report.md).
 
 Цепочка вызова:
 
 ```text
-тест  →  api_client.get("/productsList")  →  requests.Session  →  automationexercise.com/api
-         ↑ фикстура из conftest.py
+tests/test_products.py  →  api_client.get("/productsList")  →  requests.Session  →  automationexercise.com/api
+tests/test_brands.py    →  api_client.get("/brandsList")    →  requests.Session  →  automationexercise.com/api
+                           ↑ фикстура из conftest.py
 ```
 
 Роли файлов:
@@ -88,7 +95,9 @@ aqa-api-starter/
 |------|--------|
 | `api/client.py` | Единственное место, где собирается URL и уходит HTTP-запрос |
 | `tests/conftest.py` | Создаёт клиент один раз на прогон и отдаёт его тестам |
-| `tests/test_products.py` | Сценарии: что вызвать и что проверить |
+| `tests/test_products.py` | Сценарии каталога товаров: что вызвать и что проверить |
+| `tests/test_brands.py` | Сценарий списка брендов |
+| `tests/ui/test_ui_layer.py` | Пустой UI-слой, чтобы пайплайн уже имел вторую стадию |
 | `pytest.ini` | `testpaths = tests` и `pythonpath = .`, чтобы работал `from api.client import ApiClient` |
 
 Тест **не** знает полный URL и **не** вызывает `requests.get` сам. Он получает готовый клиент аргументом функции.
@@ -261,7 +270,7 @@ pytest session (прогон)
 
 Когда этот минимум станет привычным:
 
-- добавить `PUT` / `DELETE` в клиент и тесты на `/brandsList`;
+- добавить `PUT` / `DELETE` в клиент; GET `/brandsList` уже лежит в `tests/test_brands.py`;
 - вынести эндпоинты в сервис (`ProductsService.get_products()`), если путей станет много;
 - параметризовать поиск (`@pytest.mark.parametrize`);
 - типизировать JSON-ответ dataclass / pydantic, если проверки полей разрастутся.
