@@ -8,6 +8,7 @@ import pytest
 @allure.severity(allure.severity_level.CRITICAL)
 @allure.tag("smoke", "brands")
 @pytest.mark.api
+@pytest.mark.smoke
 def test_get_brands(api_client):
     with allure.step("Запросить список брендов"):
         response = api_client.get("/brandsList")
@@ -37,3 +38,20 @@ def test_get_brands(api_client):
             brand_ids.append(brand["id"])
 
         assert len(brand_ids) == len(set(brand_ids))
+
+@allure.epic("API")
+@allure.feature("Brands")
+@allure.story("PUT /brandsList")
+@allure.title("PUT на список  брендов не поддерживается")
+@allure.severity(allure.severity_level.CRITICAL)
+@allure.tag("smoke", "brands")
+@pytest.mark.api
+def test_put_brands(api_client):
+    with allure.step("Отправить PUT /brandsList"):
+        response = api_client.put("/brandsList")
+        body = response.json()
+
+    with allure.step("Проверить, что метод запрещен"):
+        assert response.status_code == 200
+        assert body["responseCode"] == 405
+        assert body["message"]  == "This request method is not supported."
