@@ -17,6 +17,7 @@ def test_get_products(api_client):
         assert response.status_code == 200
         assert body["responseCode"] == 201
         assert body["products"]
+        assert body["products"][0]["brand"]
 
 
 @allure.epic("API")
