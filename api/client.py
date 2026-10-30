@@ -20,3 +20,6 @@ class ApiClient:
 
     def post(self, path: str, **kwargs) -> requests.Response:
         return self.session.post(f"{self.base_url}{path}", timeout=self.timeout, **kwargs)
+
+    def put(self, path: str, **kwargs) -> requests.Response:
+        return self.session.put(f"{self.base_url}{path}", timeout=self.timeout, **kwargs)

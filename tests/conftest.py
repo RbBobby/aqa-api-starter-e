@@ -49,6 +49,12 @@ class AllureApiClient(ApiClient):
             _attach_http(response)
             return response
 
+    def put(self, path: str, **kwargs) -> Response:
+        with allure.step(f"PUT {path}"):
+            response = super().put(path, **kwargs)
+            _attach_http(response)
+            return response
+
 
 @pytest.fixture(scope="session")
 def api_client():
