@@ -1,9 +1,6 @@
-import os
-
 import requests
 
-BASE_URL = os.getenv("API_BASE_URL", "https://automationexercise.com/api").rstrip("/")
-TIMEOUT = int(os.getenv("API_TIMEOUT", "30"))
+from api.constants import BASE_URL, TIMEOUT
 
 
 class ApiClient:

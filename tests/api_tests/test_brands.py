@@ -1,5 +1,6 @@
 import allure
 import pytest
+from api.sevices.brands_service import BrandsService
 
 @allure.epic("API")
 @allure.feature("Brands")
@@ -8,17 +9,10 @@ import pytest
 @allure.severity(allure.severity_level.CRITICAL)
 @allure.tag("smoke", "brands")
 @pytest.mark.api
-def test_get_brands(api_client):
-    with allure.step("Запросить список брендов"):
-        response = api_client.get("/brandsList")
+def test_get_brands(brands_service: BrandsService):
 
-    with allure.step("Проверить HTTP 200"):
-        assert response.status_code == 200
-        assert response.reason == "OK"
-
-    with allure.step("Разобрать JSON и проверить список брендов"):
-        data = response.json()
-        brands = data["brands"]
+    with allure.step("Получаем список брендов"):
+        brands = brands_service.get_brands()
 
         assert isinstance(brands, list)
         assert len(brands) > 33
