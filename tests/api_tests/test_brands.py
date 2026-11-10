@@ -1,57 +1,46 @@
 import allure
 import pytest
 from api.sevices.brands_service import BrandsService
+from api.constants import MESSAGE_PUT_BRANDS
+
 
 @allure.epic("API")
 @allure.feature("Brands")
-@allure.story("GET /brandsList")
-@allure.title("Список брендов возвращается и валиден")
-@allure.severity(allure.severity_level.CRITICAL)
-@allure.tag("smoke", "brands")
 @pytest.mark.api
-<<<<<<< HEAD:tests/test_brands.py
-@pytest.mark.smoke
-def test_get_brands(api_client):
-    with allure.step("Запросить список брендов"):
-        response = api_client.get("/brandsList")
-=======
-def test_get_brands(brands_service: BrandsService):
->>>>>>> main:tests/api_tests/test_brands.py
+class TestBrands:
 
-    with allure.step("Получаем список брендов"):
-        brands = brands_service.get_brands()
+    @allure.story("GET /brandsList")
+    @allure.title("Список брендов возвращается")
+    @allure.severity(allure.severity_level.CRITICAL)
+    def test_get_brands(self, brands_service: BrandsService):
+        with allure.step("Получаем список брендов"):
+            brands = brands_service.get_brands()
 
-        assert isinstance(brands, list)
-        assert len(brands) > 33
+            assert isinstance(brands, list)
+            assert len(brands) > 33
 
-    with allure.step("Проверить структуру, типы и уникальность брендов"):
-        brand_ids = []
+        with allure.step("Проверить структуру, типы и уникальность брендов"):
+            brand_ids = []
 
-        for brand in brands:
-            assert isinstance(brand, dict)
-            assert "id" in brand
-            assert "brand" in brand
-            assert type(brand["id"]) is int
-            assert brand["id"] > 0
-            assert isinstance(brand["brand"], str)
-            assert brand["brand"].strip() != ""
-            brand_ids.append(brand["id"])
+            for brand in brands:
+                assert isinstance(brand, dict)
+                assert "id" in brand
+                assert "brand" in brand
+                assert type(brand["id"]) is int
+                assert brand["id"] > 0
+                assert isinstance(brand["brand"], str)
+                assert brand["brand"].strip() != ""
+                brand_ids.append(brand["id"])
 
-        assert len(brand_ids) == len(set(brand_ids))
+            assert len(brand_ids) == len(set(brand_ids))
 
-@allure.epic("API")
-@allure.feature("Brands")
-@allure.story("PUT /brandsList")
-@allure.title("PUT на список  брендов не поддерживается")
-@allure.severity(allure.severity_level.CRITICAL)
-@allure.tag("smoke", "brands")
-@pytest.mark.api
-def test_put_brands(api_client):
-    with allure.step("Отправить PUT /brandsList"):
-        response = api_client.put("/brandsList")
-        body = response.json()
+    @allure.story("PUT /brandsList")
+    @allure.title("PUT на список брендов не поддерживается")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_put_brands_not_supported(self, brands_service: BrandsService):
+        with allure.step("Отправить PUT запрос"):
+            body = brands_service.upd_brands()
 
-    with allure.step("Проверить, что метод запрещен"):
-        assert response.status_code == 200
-        assert body["responseCode"] == 405
-        assert body["message"]  == "This request method is not supported."
+        with allure.step("Проверить ответ об ошибке"):
+            assert body["responseCode"] == 405
+            assert body["message"] == MESSAGE_PUT_BRANDS

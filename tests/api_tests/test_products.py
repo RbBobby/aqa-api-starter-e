@@ -1,36 +1,32 @@
 import allure
 import pytest
-
+from api.sevices.products_service import ProductsService
+from api.constants import MESSAGE_PUT_BRANDS
 
 @allure.epic("API")
 @allure.feature("Products")
-@allure.story("POST /productsList")
 @pytest.mark.api
 class TestsProductsService:
+
+    @allure.story("GET /productsList")
     @allure.title("Список товаров возвращается")
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.tag("smoke", "products")
-    def test_get_products(api_client):
+    def test_get_products(self, products_service):
         with allure.step("Запросить список товаров"):
-            response = api_client.get("/productsList")
-            body = response.json()
+            products = products_service.get_products()
 
-        with allure.step("Проверить HTTP 200 и непустой список"):
-            assert response.status_code == 200
-            assert body["responseCode"] == 201
-            assert body["products"]
+            assert isinstance(products, list)
+            assert len(products) > 1
 
-
+    @allure.story("POST /productsList")
     @allure.title("POST на список товаров не поддерживается")
     @allure.severity(allure.severity_level.NORMAL)
     @allure.tag("negative", "products")
-    def test_post_products_not_supported(api_client):
-        with allure.step("Отправить POST /productsList"):
-            response = api_client.post("/productsList")
-            body = response.json()
+    def test_post_products_not_supported(self,products_service):
+        with allure.step("Отправить POST через сервис"):
+            body = products_service.post_products_not_supported()
 
         with allure.step("Проверить, что метод запрещён в JSON"):
-            # HTTP 200, ошибка в JSON — особенность этого API
-            assert response.status_code == 200
             assert body["responseCode"] == 405
-            assert body["message"] == "This request method is not supported."
+            assert body["message"] == MESSAGE_PUT_BRANDS

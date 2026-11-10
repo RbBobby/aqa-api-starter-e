@@ -20,7 +20,7 @@ class BrandsService:
 
     def upd_brands(self):
         with allure.step("Обновляем список брендов"):
-            response = self.api_client.get(ENDPOINT)
+            response = self.api_client.put(ENDPOINT)
             body = response.json()
         with allure.step("Проверить, что метод не рабочий. HTTP 405"):
             assert body["responseCode"] == 405, f"Статус код = {body['responseCode']}"

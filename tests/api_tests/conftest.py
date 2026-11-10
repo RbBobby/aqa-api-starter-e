@@ -6,6 +6,7 @@ from requests import Response
 
 from api.client import ApiClient
 from api.sevices.brands_service import BrandsService
+from api.sevices.products_service import ProductsService
 
 
 def _attach_http(response: Response) -> None:
@@ -77,3 +78,8 @@ def pytest_collection_modifyitems(items):
             item.add_marker(pytest.mark.ui)
         else:
             item.add_marker(pytest.mark.api)
+
+
+@pytest.fixture
+def products_service(api_client: ApiClient) -> ProductsService:
+    return ProductsService(api_client)
