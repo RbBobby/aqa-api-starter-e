@@ -8,3 +8,4 @@ venv/
 allure-results/
 allure-report/
 docs/
+.idea/

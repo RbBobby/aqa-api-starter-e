@@ -5,6 +5,8 @@ import pytest
 from requests import Response
 
 from api.client import ApiClient
+from api.sevices.brands_service import BrandsService
+from api.sevices.products_service import ProductsService
 
 
 def _attach_http(response: Response) -> None:
@@ -49,12 +51,23 @@ class AllureApiClient(ApiClient):
             _attach_http(response)
             return response
 
+    def put(self, path: str, **kwargs) -> Response:
+        with allure.step(f"PUT {path}"):
+            response = super().put(path, **kwargs)
+            _attach_http(response)
+            return response
+
 
 @pytest.fixture(scope="session")
 def api_client():
     client = AllureApiClient()
     yield client
     client.close()
+
+
+@pytest.fixture
+def brands_service(api_client: ApiClient) -> BrandsService:
+    return BrandsService(api_client)
 
 
 def pytest_collection_modifyitems(items):
@@ -65,3 +78,8 @@ def pytest_collection_modifyitems(items):
             item.add_marker(pytest.mark.ui)
         else:
             item.add_marker(pytest.mark.api)
+
+
+@pytest.fixture
+def products_service(api_client: ApiClient) -> ProductsService:
+    return ProductsService(api_client)
