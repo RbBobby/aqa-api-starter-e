@@ -2,6 +2,7 @@ import allure
 import pytest
 from api.sevices.products_service import ProductsService
 from api.constants import MESSAGE_PUT_BRANDS
+from api.models.products import Product, ErrorResponse
 
 @allure.epic("API")
 @allure.feature("Products")
@@ -12,12 +13,20 @@ class TestsProductsService:
     @allure.title("Список товаров возвращается")
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.tag("smoke", "products")
-    def test_get_products(self, products_service):
+    def test_get_products(self, products_service: ProductsService):
         with allure.step("Запросить список товаров"):
             products = products_service.get_products()
 
-            assert isinstance(products, list)
-            assert len(products) > 1
+        with allure.step("Каталог не пустой"):
+            assert len(products) > 10
+
+        with allure.step("Все id положительные и уникальные"):
+            ids = [p.id for p in products]
+            assert all(pid > 0 for pid in ids)
+            assert len(ids) == len(set(ids))
+
+        with allure.step("Названия не пустые"):
+            assert all(p.name.strip() !='' for p in products)
 
     @allure.story("POST /productsList")
     @allure.title("POST на список товаров не поддерживается")
@@ -25,8 +34,8 @@ class TestsProductsService:
     @allure.tag("negative", "products")
     def test_post_products_not_supported(self,products_service):
         with allure.step("Отправить POST через сервис"):
-            body = products_service.post_products_not_supported()
-
+            response_dict = products_service.post_products_not_supported()
+            error = ErrorResponse.model_validate(response_dict)
         with allure.step("Проверить, что метод запрещён в JSON"):
-            assert body["responseCode"] == 405
-            assert body["message"] == MESSAGE_PUT_BRANDS
+            assert error.response_code == 405
+            assert error.message == MESSAGE_PUT_BRANDS
