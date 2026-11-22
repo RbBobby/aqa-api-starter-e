@@ -2,6 +2,7 @@ import allure
 
 from api.client import ApiClient
 from api.constants import MESSAGE_PUT_BRANDS
+from api.models.products import Product, ProductListResponse
 
 ENDPOINT = "/productsList"
 
@@ -15,7 +16,12 @@ class ProductsService:
         with allure.step("Проверить HTTP 200"):
             assert response.status_code == 200, f"Статус код = {response.status_code}"
             assert response.reason == "OK"
-        return response.json()["products"]
+
+        with allure.step("Проверка схемы ответа продуктов"):
+            parsed = ProductListResponse.model_validate(response.json())
+            assert parsed.response_code == 200
+
+        return parsed.products
 
     def post_products_not_supported(self):
         with allure.step("Обновляем список брендов"):

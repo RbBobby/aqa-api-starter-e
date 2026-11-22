@@ -2,6 +2,7 @@ import allure
 import pytest
 from api.sevices.brands_service import BrandsService
 from api.constants import MESSAGE_PUT_BRANDS
+from api.models.brands import Brand
 
 
 @allure.epic("API")
@@ -23,14 +24,11 @@ class TestBrands:
             brand_ids = []
 
             for brand in brands:
-                assert isinstance(brand, dict)
-                assert "id" in brand
-                assert "brand" in brand
-                assert type(brand["id"]) is int
-                assert brand["id"] > 0
-                assert isinstance(brand["brand"], str)
-                assert brand["brand"].strip() != ""
-                brand_ids.append(brand["id"])
+                assert isinstance(brand, Brand)
+                assert type(brand.id) is int
+                assert brand.id > 0
+                assert brand.brand.strip() != ""
+                brand_ids.append(brand.id)
 
             assert len(brand_ids) == len(set(brand_ids))
 
